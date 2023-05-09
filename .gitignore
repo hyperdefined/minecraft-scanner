@@ -1,3 +1,4 @@
 .env
 database.csv
 node_modules/
+__pycache__
