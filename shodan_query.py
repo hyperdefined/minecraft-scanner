@@ -112,4 +112,4 @@ for index, row in servers.iterrows():
     result = subprocess.Popen(cmd)
     result.wait()
     # sleep for 1 minute so we don't ratelimit ourself
-    time.sleep(60)
+    time.sleep(20)

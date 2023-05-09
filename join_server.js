@@ -7,12 +7,10 @@ const serverPort = parseInt(process.argv[3]);
 dotenv.config()
 
 const bot = mineflayer.createBot({
-  host: serverAddress, // minecraft server ip
-  username: process.env.MINECRAFT, // minecraft username
-  auth: 'microsoft', // for offline mode servers, you can set this to 'offline'
-  port: serverPort                // only set if you need a port that isn't 25565
-  // version: false,             // only set if you need a specific version or snapshot (ie: "1.8.9" or "1.16.5"), otherwise it's set automatically
-  // password: '12345678'        // set if you want to use password-based auth (may be unreliable)
+  host: serverAddress,
+  username: process.env.MINECRAFT,
+  auth: 'microsoft',
+  port: serverPort
 })
 
 bot.once('login', () => {
