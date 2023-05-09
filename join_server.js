@@ -17,11 +17,6 @@ bot.once('login', () => {
     bot.chat("Hello! I am a server scanner bot!")
     bot.chat("/pl")
     console.log("Logged into server " + serverAddress);
-    if (!bot.players || Object.keys(bot.players).length === 0) {
-      console.log("There are no players online.");
-    } else {
-      console.log(`Players online: ${Object.keys(bot.players).join(', ')}`);
-    }
     // Leave the server after 5 seconds
     setTimeout(() => {
         bot.quit();
@@ -39,7 +34,6 @@ bot.once('kicked', (reason) => {
   console.log('Kicked from ' + serverAddress + ' for reason: ' + reason);
   process.exit(0);
 });
-
 bot.once('error', () => {
   console.log('Error from ' + serverAddress);
   process.exit(0)
