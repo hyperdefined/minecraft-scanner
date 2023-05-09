@@ -6,6 +6,7 @@ import time
 from dotenv import load_dotenv
 import single_query
 import sys
+import random
 
 def motd_to_string(motd):
     # If the dictionary only has a 'text' key, return its value
@@ -101,7 +102,7 @@ if counter > 0:
 mc_versions = [47, 107, 108, 109, 110, 210, 315, 316, 335, 338, 340, 393, 401, 404, 477, 480, 485, 490, 498, 573, 575, 578, 735, 736, 751, 753, 754, 755, 756, 757, 758, 759]
 servers = minecraft_server_data[(minecraft_server_data['Protocol'].isin(mc_versions)) & (minecraft_server_data['Forge'] == 0)]
 # randomize the rows for fun
-servers = servers.sample(frac=1, random_state=42)
+servers = servers.sample(frac=1, random_state=random.randint(1,500))
 for index, row in servers.iterrows():
     ip_address = row['IP']
     port = row['Port']
@@ -111,5 +112,5 @@ for index, row in servers.iterrows():
     cmd = ['node', 'join_server.js', str(ip_address), str(port)]
     result = subprocess.Popen(cmd)
     result.wait()
-    # sleep for 1 minute so we don't ratelimit ourself
+    # sleep for 20 seconds so we don't ratelimit ourself
     time.sleep(20)
