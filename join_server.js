@@ -15,9 +15,10 @@ const bot = mineflayer.createBot({
 
 bot.once('login', () => {
     bot.chat("Hello! I am a server scanner bot!")
-    console.log('Logged into server ' + serverAddress);
+    bot.chat("/pl")
+    console.log("Logged into server " + serverAddress);
     if (!bot.players || Object.keys(bot.players).length === 0) {
-      console.log('There are no players online.');
+      console.log("There are no players online.");
     } else {
       console.log(`Players online: ${Object.keys(bot.players).join(', ')}`);
     }
@@ -27,6 +28,13 @@ bot.once('login', () => {
         process.exit(0)
     }, 5000);
 });
+bot.on('chat', (username, message) => {
+  if (username === bot.username) return;
+  console.log(`<${username}> ${message}`)
+})
+bot.on('messagestr', (message) => {
+  console.log(`${message}`)
+})
 bot.once('kicked', (reason) => {
   console.log('Kicked from ' + serverAddress + ' for reason: ' + reason);
   process.exit(0);
