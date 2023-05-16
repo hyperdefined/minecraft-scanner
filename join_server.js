@@ -1,12 +1,12 @@
-const mineflayer = require('mineflayer')
-const dotenv = require("dotenv")
+import { createBot } from 'mineflayer';
+import { config } from "dotenv";
 
 const serverAddress = process.argv[2];
 const serverPort = parseInt(process.argv[3]);
 
-dotenv.config()
+config()
 
-const bot = mineflayer.createBot({
+const bot = createBot({
   host: serverAddress,
   username: process.env.MINECRAFT,
   auth: 'microsoft',
