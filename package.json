@@ -1,6 +1,10 @@
 {
   "dependencies": {
+    "@sfirew/minecraft-motd-parser": "^1.1.1",
+    "csv-parser": "^3.0.0",
     "dotenv": "^16.0.3",
+    "fs": "^0.0.1-security",
     "mineflayer": "^4.8.1"
-  }
+  },
+  "type": "module"
 }
