@@ -9,7 +9,7 @@ def update_server_info(ip_address):
     api = shodan.Shodan(api_key)
 
     data_exists = os.path.exists("database.csv")
-    minecraft_server_data = pd.DataFrame(columns=['IP','Port','Protocol','Software','MOTD', 'Forge', 'Icon'])
+    minecraft_server_data = pd.DataFrame(columns=['IP','Port','Protocol','Software','MOTD', 'Forge', 'Icon', 'Joins', 'Fails'])
     if data_exists:
         minecraft_server_data = pd.read_csv("database.csv")
     else:

@@ -18,7 +18,7 @@ def filter_servers(server_data):
         if protocol == 'UNKNOWN':
             continue
         protocol = int(protocol)
-        if protocol in mc_versions and row['Forge'] == 0:
+        if protocol in mc_versions and row['Forge'] == 0 and row['Joins'] < 5:
             filtered_rows.append(row)
     random.shuffle(filtered_rows)
     filtered_data = pd.DataFrame(filtered_rows, columns=server_data.columns)
@@ -29,8 +29,38 @@ def join_server(host, port, version):
     # build the command to run the node script to join
     print('Trying ' + str(host) + ':' + str(port) + ' with version ' + str(version))
     cmd = ['node', 'join_server.js', str(host), str(port)]
-    result = subprocess.Popen(cmd)
-    result.wait()
+    result = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = result.communicate()
+
+    # Decode the output from bytes to string
+    output = stdout.decode('utf-8')
+    error = stderr.decode('utf-8')
+
+    ip_query = minecraft_server_data[minecraft_server_data['IP'] == host]
+
+    # Print or return the output
+    if output:
+        # kicked from server
+        # logged into server
+        if 'Kicked from' in output:
+            current_fails = ip_query['Fails'].iloc[0]
+            new_fails = current_fails + 1
+            minecraft_server_data.loc[ip_query.index, 'Fails'] = int(new_fails)
+            minecraft_server_data.to_csv('database.csv', index=False)
+        if 'Logged into server' in output:
+            # Action to perform when 'Logged into server' is present in the output
+            current_joins = ip_query['Joins'].iloc[0]
+            new_joins = current_joins + 1
+            minecraft_server_data.loc[ip_query.index, 'Joins'] = int(new_joins)
+            minecraft_server_data.to_csv('database.csv', index=False)
+        print(output)
+    if error:
+        # error connecting
+        print('Error:', error)
+        current_fails = ip_query['Fails'].iloc[0]
+        new_fails = current_fails + 1
+        minecraft_server_data.loc[ip_query.index, 'Fails'] = int(new_fails)
+        minecraft_server_data.to_csv('database.csv', index=False)
 
 load_dotenv()
 
@@ -38,7 +68,7 @@ api_key = os.getenv('SHODAN_KEY')
 api = shodan.Shodan(api_key)
 
 data_exists = os.path.exists("database.csv")
-minecraft_server_data = pd.DataFrame(columns=['IP','Port','Protocol','Software','MOTD', 'Forge', 'Icon'])
+minecraft_server_data = pd.DataFrame(columns=['IP','Port','Protocol','Software','MOTD', 'Forge', 'Icon', 'Joins', 'Fails'])
 if data_exists:
     print('Loading current database...')
     minecraft_server_data = pd.read_csv("database.csv")
