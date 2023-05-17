@@ -18,7 +18,7 @@ def filter_servers(server_data):
         if protocol == 'UNKNOWN':
             continue
         protocol = int(protocol)
-        if protocol in mc_versions and row['Forge'] == 0 and row['Joins'] < 5:
+        if protocol in mc_versions and row['Forge'] == 0 and row['Joins'] < 1:
             filtered_rows.append(row)
     random.shuffle(filtered_rows)
     filtered_data = pd.DataFrame(filtered_rows, columns=server_data.columns)

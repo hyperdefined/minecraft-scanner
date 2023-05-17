@@ -19,9 +19,17 @@ bot.once('login', () => {
     console.log("Logged into server " + serverAddress);
     // Leave the server after 5 seconds
     setTimeout(() => {
+        bot.chat("Goodbye!")
         bot.quit();
         process.exit(0)
     }, 5000);
+});
+bot.once('spawn', () => {
+  // Move the bot forward for 3 seconds
+  bot.setControlState('forward', true);
+  setTimeout(() => {
+    bot.setControlState('forward', false);
+  }, 3000);
 });
 bot.on('chat', (username, message) => {
   if (username === bot.username) return;
