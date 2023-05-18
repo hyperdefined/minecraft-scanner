@@ -18,7 +18,7 @@ def filter_servers(server_data):
         if protocol == 'UNKNOWN':
             continue
         protocol = int(protocol)
-        if protocol in mc_versions and row['Forge'] == 0 and row['Joins'] < 1:
+        if protocol in mc_versions and row['Forge'] == 0 and row['Joins'] == 0 and row['Fails'] == 0:
             filtered_rows.append(row)
     random.shuffle(filtered_rows)
     filtered_data = pd.DataFrame(filtered_rows, columns=server_data.columns)
@@ -74,20 +74,27 @@ if data_exists:
     minecraft_server_data = pd.read_csv("database.csv")
     print('Loaded ' + str(len(minecraft_server_data.index)) + " servers.")
 
-counter = 0
-
+# passed in args
 if len(sys.argv) == 2:
+    # user wants to update existing servers
     if sys.argv[1] == 'update':
-        minecraft_server_data = minecraft_server_data[::-1].reset_index(drop=True)
+        # randomize the order
+        minecraft_server_data = minecraft_server_data.sample(frac=1, random_state=random.randint(1,500)).reset_index(drop=True)
+
+        # filter out servers we can join
         filtered_servers = filter_servers(minecraft_server_data)
         for index, row in filtered_servers.iterrows():
             ip = row['IP']
             port = row['Port']
             version = row['Protocol']
+            # update the information
             single_query.update_server_info(ip_address=str(ip))
             time.sleep(5)
+            # join the server
             join_server(host=ip, port=port, version=version)
 
+counter = 0
+new_servers = pd.DataFrame(columns=['IP','Port','Protocol','Software','MOTD', 'Forge', 'Icon', 'Joins', 'Fails'])
 try:
     results = api.search("\"Minecraft Server:\"")
     for result in results["matches"]:
@@ -141,17 +148,25 @@ try:
         
         # add the new data
         new_row_df = pd.DataFrame([new_server_data])
-        minecraft_server_data = pd.concat([minecraft_server_data, new_row_df], ignore_index=True)
+        new_servers = pd.concat([new_servers, new_row_df], ignore_index=True)
+        new_servers['Joins'] = 0
+        new_servers['Fails'] = 0
 except shodan.APIError as e:
     print("Error: %s" % e)
 
-minecraft_server_data.to_csv("database.csv", index=False)
+# if we added new servers, add and save them
+if not new_servers.empty and counter >= 1:
+    minecraft_server_data = pd.concat([minecraft_server_data, new_servers], ignore_index=True)
+    minecraft_server_data.to_csv("database.csv", index=False)
+else:
+    print('No new servers were returned from Shodan. Exiting.')
+    sys.exit(0)
 
-if counter > 0:
-    print('Added ' + str(counter) + ' new servers.')
-    print('New total: ' + str(len(minecraft_server_data.index)) + ' servers.')
+print('Added ' + str(counter) + ' new servers.')
+print('New total: ' + str(len(minecraft_server_data.index)) + ' servers.')
 
-filtered_servers = filter_servers(minecraft_server_data)
+# test join the new servers
+filtered_servers = filter_servers(new_servers)
 for index, row in filtered_servers.iterrows():
     join_server(host=row['IP'], port=row['Port'], version=row['Protocol'])
     # sleep for 20 seconds so we don't ratelimit ourself
